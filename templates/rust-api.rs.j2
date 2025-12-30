@@ -39,10 +39,15 @@
 //! block.highlight_bg = WIMP_COLOUR_CREAM;
 //! block.title_flags = WIMP_ICON_VCENTRED | WIMP_ICON_RJUSTIFIED;
 //!
-//! let mut title: Vec<u8> = Vec::from(c"WindowTitle".to_bytes_with_nul());
+//! let mut title = Vec::from(c"WindowTitle".to_bytes_with_nul());
 //! // Access union member, automatically setting the WIMP_ICON_INDIRECTED
 //! // and WIMP_ICON_TEXT title_flags
+//! # #[cfg(target_arch = "aarch64")] {
 //! block.title_data_indirected_text_mut().text = title.as_mut_ptr();
+//! # }
+//! # #[cfg(not(target_arch = "aarch64"))] {
+//! # block.title_data_indirected_text_mut().text = title.as_mut_ptr() as *const std::os::raw::c_char;
+//! # }
 //! block.title_data_indirected_text_mut().size = title.len() as i32;
 //! block.title_data_indirected_text_mut().validation = std::ptr::null();
 //!
@@ -196,7 +201,7 @@ i16
     {%- elif t in ['.Byte', '.Data'] -%}
 u8
     {%- elif t in ['.String', '.Char'] -%}
-u8
+std::os::raw::c_char
     {%- elif t in ['.Asm'] -%}
 *const std::os::raw::c_void
     {%- elif t in ['Void'] -%}
